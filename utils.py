@@ -39,7 +39,7 @@ def log_images(batch, generator, discriminator, tensor_type):
 		plt.axis('off')
 
 		plt.subplot(fake_dose.size(0), 5, 5 * i + 5)
-		plt.imshow(fake_dose[i, 0, :, :].detach().numpy(), cmap='gray', origin='lower')
+		plt.imshow(fake_dose[i, 0, :, :].cpu().detach().numpy(), cmap='gray', origin='lower')
 		plt.title(f"Predicted dose (proba: {proba[i].item():.2f})")
 		plt.axis('off')
 
