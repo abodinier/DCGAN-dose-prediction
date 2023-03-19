@@ -10,11 +10,14 @@ def log_images(batch, generator, discriminator, tensor_type):
 	possible_dose_mask = batch["possible_dose_mask"]
 	real_dose = batch["dose"]
 
-	generator.eval()
-	discriminator.eval()
 	with torch.no_grad():
+		generator.eval()
 		fake_dose = generator(input)
-		proba = torch.nn.Sigmoid()(discriminator(input, fake_dose))[:, 0]
+		if discriminator is not None:
+			discriminator.eval()
+			proba = torch.nn.Sigmoid()(discriminator(input, fake_dose))[:, 0]
+		else:
+			proba = torch.zeros(size=(fake_dose.size(0), 1))
 
 	fig = plt.figure(figsize=(30, 30))
 	for i in range(fake_dose.size(0)):
