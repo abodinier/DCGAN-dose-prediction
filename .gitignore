@@ -1,3 +1,5 @@
 MVA-Dose-Prediction/
 .DS_STORE
 __pycache__
+trains/
+.ipynb_checkpoints

@@ -1,53 +1,46 @@
+import torch
+import numpy as np
 import matplotlib.pyplot as plt
 
-def save_image(imgs, gen_img, n_epoch, path_save_fig = f"./images/generator/epoch"):
+def log_images(batch, generator, discriminator, tensor_type):
 
-  real_ct = imgs["ct"] #.type(Tensor)
-  real_structure_masks = imgs["structure_masks"].sum(axis=1) #.type(Tensor)
-  real_dose = imgs["dose"] #.type(Tensor)
-  real_img = imgs["img"] #.type(Tensor) 
-  real_possible_dose_mask = imgs["possible_dose_mask"] #.type(Tensor)
+	ct = batch["ct"]
+	input = batch["img"].type(tensor_type)
+	structure_mask = batch["structure_masks"].sum(dim=1)
+	possible_dose_mask = batch["possible_dose_mask"]
+	real_dose = batch["dose"]
 
-  n_batchs = real_ct.shape[0]
+	generator.eval()
+	discriminator.eval()
+	with torch.no_grad():
+		fake_dose = generator(input)
+		proba = torch.nn.Sigmoid()(discriminator(input, fake_dose))[:, 0]
 
-  for i_batch in range(n_batchs):
+	fig = plt.figure(figsize=(30, 30))
+	for i in range(fake_dose.size(0)):
+		plt.subplot(fake_dose.size(0), 5, 5 * i + 1)
+		plt.imshow(ct[i], cmap='gray', origin='lower')
+		plt.title("CT")
+		plt.axis('off')
 
-    real_possible_dose_mask_data_i = real_possible_dose_mask.data[i_batch,:,:]
-    real_ct_data_i = real_ct.data[i_batch,:,:]
-    real_dose_data_i = real_dose.data[i_batch,:,:]
-    real_structure_masks_data_i = real_structure_masks.data[i_batch,:,:]
+		plt.subplot(fake_dose.size(0), 5, 5 * i + 2)
+		plt.imshow(possible_dose_mask[i], cmap='gray', origin='lower')
+		plt.title("Possible dose mask")
+		plt.axis('off')
 
-    plt.figure(figsize=(15, 4))
-    plt.subplot(1, 5, 1)
-    plt.imshow(real_ct_data_i, cmap='gray', origin='lower')
-    plt.title("CT")
-    plt.axis('off')
+		plt.subplot(fake_dose.size(0), 5, 5 * i + 3)
+		plt.imshow(structure_mask[i], cmap='gray', origin='lower')
+		plt.title("Structure masks")
+		plt.axis('off')
 
-    plt.subplot(1, 5, 2)
-    plt.imshow(real_possible_dose_mask_data_i, cmap='gray', origin='lower')
-    plt.title("Possible dose mask")
-    plt.axis('off')
+		plt.subplot(fake_dose.size(0), 5, 5 * i + 4)
+		plt.imshow(real_dose[i], cmap='gray', origin='lower')
+		plt.title("Dose")
+		plt.axis('off')
 
-    plt.subplot(1, 5, 3)
-    plt.imshow(real_structure_masks_data_i,
-              cmap='gray', origin='lower')
-    plt.title("Structure masks")
-    plt.axis('off')
+		plt.subplot(fake_dose.size(0), 5, 5 * i + 5)
+		plt.imshow(fake_dose[i, 0, :, :].detach().numpy(), cmap='gray', origin='lower')
+		plt.title(f"Predicted dose (proba: {proba[i].item():.2f})")
+		plt.axis('off')
 
-    plt.subplot(1, 5, 4)
-    plt.imshow(real_dose_data_i, cmap='gray', origin='lower')
-    plt.title("Dose")
-    plt.axis('off')
-
-    plt.subplot(1, 5, 5)
-    plt.imshow(gen_img[i_batch,0,:,:], cmap='gray', origin='lower')
-    plt.title("Predicted dose")
-    plt.axis('off')
-
-    plt.savefig(f'{path_save_fig}_{n_epoch}.png')
-    plt.show()
-
-def sample_images(epoch, dataloader, generator, tensor_type):
-    imgs = next(iter(dataloader))
-    fake_dose = generator(imgs["img"].type(tensor_type))
-    save_image(imgs, fake_dose.data.cpu(), epoch, f"./images/generator/epoch")
+	return fig
