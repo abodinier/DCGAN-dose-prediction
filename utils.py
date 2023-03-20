@@ -22,22 +22,22 @@ def log_images(batch, generator, discriminator, tensor_type):
 	fig = plt.figure(figsize=(30, 30))
 	for i in range(fake_dose.size(0)):
 		plt.subplot(fake_dose.size(0), 5, 5 * i + 1)
-		plt.imshow(ct[i], cmap='gray', origin='lower', vmin=0, vmax=255)
+		plt.imshow(ct[i], cmap='gray', origin='lower', vmin=0)
 		plt.title("CT")
 		plt.axis('off')
 
 		plt.subplot(fake_dose.size(0), 5, 5 * i + 2)
-		plt.imshow(possible_dose_mask[i], cmap='gray', origin='lower', vmin=0, vmax=255)
+		plt.imshow(possible_dose_mask[i], cmap='gray', origin='lower', vmin=0)
 		plt.title("Possible dose mask")
 		plt.axis('off')
 
 		plt.subplot(fake_dose.size(0), 5, 5 * i + 3)
-		plt.imshow(structure_mask[i], cmap='gray', origin='lower', vmin=0, vmax=255)
+		plt.imshow(structure_mask[i], cmap='gray', origin='lower', vmin=0)
 		plt.title("Structure masks")
 		plt.axis('off')
 
 		plt.subplot(fake_dose.size(0), 5, 5 * i + 4)
-		plt.imshow(real_dose[i], cmap='gray', origin='lower', vmin=0, vmax=255)
+		plt.imshow(real_dose[i], cmap='gray', origin='lower', vmin=0)
 		plt.title("Dose")
 		plt.axis('off')
 
